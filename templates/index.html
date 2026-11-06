@@ -5,221 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏨 Бронирование отеля</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px 20px;
-            color: #333;
+            padding: 20px; color: #333;
         }
+        .container { max-width: 1000px; margin: 0 auto; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+        /* Шапка */
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px; border-radius: 12px; margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
-        h1 {
-            text-align: center;
-            color: #fff;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        .topbar h1 { font-size: 1.5rem; color: #4a5568; }
+        .btn-logout {
+            background: #f56565; color: #fff; text-decoration: none;
+            padding: 8px 16px; border-radius: 6px; font-size: 0.9rem;
+            transition: 0.2s; font-weight: 600;
         }
+        .btn-logout:hover { background: #c53030; }
 
+        /* Карточки */
         .card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            transition: transform 0.2s ease;
+            background: #fff; border-radius: 16px; padding: 28px;
+            margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
-
-        .card:hover {
-            transform: translateY(-2px);
-        }
-
         .card h2 {
-            font-size: 1.4rem;
-            margin-bottom: 18px;
-            color: #4a5568;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
+            font-size: 1.3rem; margin-bottom: 18px; color: #4a5568;
+            border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;
         }
 
+        /* Ошибка */
+        .error-alert {
+            background: #fed7d7; color: #c53030; padding: 15px;
+            border-radius: 8px; margin-bottom: 20px; font-weight: bold;
+            text-align: center; border-left: 5px solid #f56565;
+        }
+
+        /* Сетка номеров */
         .rooms-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 16px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;
         }
-
         .room-card {
             background: linear-gradient(135deg, #f6f8ff 0%, #eef1ff 100%);
-            border-left: 4px solid #667eea;
-            border-radius: 10px;
-            padding: 16px;
-            transition: all 0.2s ease;
+            border-left: 4px solid #667eea; border-radius: 10px; padding: 16px;
+            transition: transform 0.2s;
         }
+        .room-card:hover { transform: scale(1.02); }
+        .room-name { font-weight: 700; font-size: 1.1rem; color: #2d3748; margin-bottom: 4px; }
+        .room-desc { font-size: 0.85rem; color: #718096; margin-bottom: 8px; }
+        .room-price { color: #667eea; font-weight: 700; font-size: 1rem; }
 
-        .room-card:hover {
-            background: linear-gradient(135deg, #eef1ff 0%, #dde3ff 100%);
-            transform: scale(1.02);
-        }
-
-        .room-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #2d3748;
-            margin-bottom: 6px;
-        }
-
-        .room-price {
-            color: #667eea;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        /* --- КАСТОМНЫЙ ВЫПАДАЮЩИЙ СПИСОК --- */
+        .custom-select {
+            position: relative;
+            user-select: none;
             flex: 1;
-            min-width: 150px;
+            min-width: 200px;
         }
-
-        label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .select-trigger {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px;
+            background: #fff; cursor: pointer; transition: 0.2s;
         }
-
-        input, select {
-            padding: 10px 14px;
-            font-size: 0.95rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            transition: border-color 0.2s ease;
-            font-family: inherit;
-            outline: none;
-        }
-
-        input:focus, select:focus {
+        .select-trigger:hover, .custom-select.open .select-trigger {
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
         }
+        .select-trigger .placeholder { color: #a0aec0; }
+        .select-trigger .selected-text { color: #2d3748; font-weight: 600; }
+        .select-trigger .arrow { transition: transform 0.3s; color: #a0aec0; }
+        .custom-select.open .arrow { transform: rotate(180deg); }
+        
+        .select-options {
+            position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+            background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            opacity: 0; visibility: hidden; transform: translateY(-10px);
+            transition: all 0.2s; z-index: 100; max-height: 300px; overflow-y: auto;
+            border: 1px solid #e2e8f0;
+        }
+        .custom-select.open .select-options {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+        .option {
+            padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #edf2f7;
+            transition: background 0.1s; display: flex; justify-content: space-between;
+        }
+        .option:last-child { border-bottom: none; }
+        .option:hover { background: #f7fafc; }
+        .option.selected { background: #ebf4ff; }
+        .option-name { font-weight: 600; color: #2d3748; }
+        .option-price { color: #667eea; font-weight: 700; font-size: 0.9rem; }
 
+        /* Форма */
+        form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+        label { font-size: 0.85rem; font-weight: 600; color: #718096; }
+        input {
+            padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px;
+            outline: none; font-size: 1rem; transition: 0.2s;
+        }
+        input:focus { border-color: #667eea; }
         button {
-            padding: 10px 24px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #fff;
+            padding: 12px 24px; font-weight: 600; color: #fff;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
+            border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; height: 46px;
         }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); }
+        .btn-cancel { background: #f56565; padding: 6px 14px; font-size: 0.85rem; height: auto; }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .btn-cancel {
-            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
-            padding: 6px 14px;
-            font-size: 0.85rem;
-        }
-
-        .btn-cancel:hover {
-            box-shadow: 0 6px 16px rgba(245, 101, 101, 0.4);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            overflow: hidden;
-            border-radius: 10px;
-        }
-
-        thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        th {
-            color: #fff;
-            padding: 14px 12px;
-            text-align: left;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 0.95rem;
-        }
-
-        tbody tr {
-            transition: background 0.15s ease;
-        }
-
-        tbody tr:hover {
-            background: #f7fafc;
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .empty {
-            text-align: center;
-            color: #a0aec0;
-            font-style: italic;
-            padding: 20px;
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .card { padding: 20px; }
-            form { flex-direction: column; }
-            .form-group { width: 100%; }
-            th, td { padding: 8px; font-size: 0.85rem; }
-        }
+        /* Таблица */
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #667eea; color: #fff; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏨 Бронирование номеров</h1>
+        <div class="topbar">
+            <h1>🏨 Hotel Booking</h1>
+            <div style="font-weight: 600;">
+                Привет, {{ username }}! 
+                <a href="/logout" class="btn-logout" style="margin-left: 15px;">Выйти</a>
+            </div>
+        </div>
+
+        {% if request.query_params.get('error') == 'room_busy' %}
+        <div class="error-alert">❌ Этот номер уже забронирован на выбранную дату!</div>
+        {% endif %}
 
         <div class="card">
             <h2>🛏️ Доступные номера</h2>
             <div class="rooms-grid">
                 {% for r in rooms %}
                 <div class="room-card">
-                    <div class="room-name">{{ r[1] }}</div>
-                    <div class="room-price">{{ r[2] }} ₽ / ночь</div>
+                    <div class="room-name">{{ r.name }}</div>
+                    <div class="room-desc">{{ r.description }}</div>
+                    <div class="room-price">{{ r.price }} ₽ / ночь</div>
                 </div>
                 {% endfor %}
             </div>
@@ -228,21 +153,35 @@
         <div class="card">
             <h2>✍️ Забронировать номер</h2>
             <form action="/book" method="post">
+                
+                <!-- Кастомный селект -->
                 <div class="form-group">
-                    <label for="room_id">Номер</label>
-                    <select name="room_id" id="room_id" required>
-                        {% for r in rooms %}
-                        <option value="{{ r[0] }}">{{ r[1] }} — {{ r[2] }} ₽</option>
-                        {% endfor %}
-                    </select>
+                    <label>Выберите номер</label>
+                    <div class="custom-select" id="room-select">
+                        <div class="select-trigger">
+                            <span class="placeholder">-- Нажмите, чтобы выбрать --</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="select-options">
+                            {% for r in rooms %}
+                            <div class="option" data-value="{{ r.id }}" data-price="{{ r.price }}">
+                                <span class="option-name">{{ r.name }}</span>
+                                <span class="option-price">{{ r.price }} ₽</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Скрытый инпут, который отправит данные на сервер -->
+                    <input type="hidden" name="room_id" id="room_id_input" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Имя гостя</label>
+                    <input name="guest" placeholder="Иван Иванов" required>
                 </div>
                 <div class="form-group">
-                    <label for="guest">Гость</label>
-                    <input name="guest" id="guest" placeholder="Иван Иванов" required>
-                </div>
-                <div class="form-group">
-                    <label for="date">Дата</label>
-                    <input name="date" id="date" type="date" required>
+                    <label>Дата заезда</label>
+                    <input name="date" type="date" required>
                 </div>
                 <button type="submit">Забронировать</button>
             </form>
@@ -253,23 +192,16 @@
             {% if bookings %}
             <table>
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Номер</th>
-                        <th>Гость</th>
-                        <th>Дата</th>
-                        <th></th>
-                    </tr>
+                    <tr><th>Номер</th><th>Гость</th><th>Дата</th><th></th></tr>
                 </thead>
                 <tbody>
                     {% for b in bookings %}
                     <tr>
-                        <td>{{ b[0] }}</td>
-                        <td>{{ b[1] }}</td>
-                        <td>{{ b[2] }}</td>
-                        <td>{{ b[3] }}</td>
+                        <td>{{ b.room.name }}</td>
+                        <td>{{ b.guest_name }}</td>
+                        <td>{{ b.date }}</td>
                         <td>
-                            <form action="/cancel/{{ b[0] }}" method="post" style="margin:0">
+                            <form action="/cancel/{{ b.id }}" method="post" style="margin:0">
                                 <button type="submit" class="btn-cancel">Отменить</button>
                             </form>
                         </td>
@@ -278,9 +210,53 @@
                 </tbody>
             </table>
             {% else %}
-            <p class="empty">Пока нет активных бронирований</p>
+            <p style="color: #a0aec0; font-style: italic;">Пока нет активных бронирований</p>
             {% endif %}
         </div>
     </div>
+
+    <!-- Скрипт для работы кастомного селекта -->
+    <script>
+        const select = document.getElementById('room-select');
+        const trigger = select.querySelector('.select-trigger');
+        const options = select.querySelectorAll('.option');
+        const hiddenInput = document.getElementById('room_id_input');
+        const triggerText = trigger.querySelector('.placeholder') || trigger.querySelector('.selected-text');
+
+        // Открытие/закрытие по клику
+        trigger.addEventListener('click', () => {
+            select.classList.toggle('open');
+        });
+
+        // Закрытие при клике вне селекта
+        document.addEventListener('click', (e) => {
+            if (!select.contains(e.target)) select.classList.remove('open');
+        });
+
+        // Выбор опции
+        options.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const value = opt.getAttribute('data-value');
+                const name = opt.querySelector('.option-name').innerText;
+                const price = opt.querySelector('.option-price').innerText;
+
+                // Обновляем скрытый инпут
+                hiddenInput.value = value;
+
+                // Меняем текст в триггере
+                trigger.innerHTML = `
+                    <span class="selected-text">${name} — ${price}</span>
+                    <span class="arrow">▼</span>
+                `;
+
+                // Подсветка выбранного
+                options.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+
+                // Закрываем список
+                select.classList.remove('open');
+            });
+        });
+    </script>
 </body>
 </html>
